@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decoding Genre Through Data</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <main class="story-page">
+        <header class="story-hero">
+            <p class="eyebrow">CMSC 471 Final Project</p>
+            <h1>Decoding Music Genre Through Audio + Lyrics</h1>
+            <p class="subtitle">
+                Can we reliably define and differentiate musical genres using analytical methods such as audio features,
+                lyrical density, and structural song data?
+            </p>
+        </header>
+
+        <section class="story-text">
+            <h2>Why Visualize This?</h2>
+            <p>
+                Humans often classify songs by feel, rhythm, and familiarity. Translating those subjective signals into objective metrics
+                is difficult at scale, especially across many genres and thousands of tracks.
+            </p>
+            <p>
+                This project uses a sequence of visualizations in storytelling format to surface patterns between genre and variables like
+                tempo, energy, loudness, key, structure, and lyrical usage. The chart below is one module in that broader narrative.
+            </p>
+        </section>
+
+        <section class="viz-grid">
+            <article class="viz-card viz-card-featured">
+                <div class="viz-card-header">
+                    <h3>t-SNE Genre Clustering</h3>
+                    <p>Songs projected into 2D space by feature similarity. Use zoom, pan, and click legend genres to filter.</p>
+                </div>
+                <div id="viz-container" class="viz-shell">
+                    <div id="tsne-chart" class="tsne-chart-panel" aria-label="t-SNE scatter plot"></div>
+                    <div id="tsne-legend" class="tsne-legend-panel" role="group" aria-label="Genres — click to hide or show"></div>
+                </div>
+            </article>
+
+            <article class="viz-card viz-card-placeholder">
+                <div class="viz-card-header">
+                    <h3>Placeholder 1</h3>
+                    <p>Add a word cloud or top terms chart to compare lyrical vocabulary across genres.</p>
+                </div>
+            </article>
+
+            <article class="viz-card viz-card-placeholder">
+                <div class="viz-card-header">
+                    <h3>Placeholder 2</h3>
+                    <p>Some description here.</p>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <div id="tooltip" class="tooltip"></div>
+
+    <script src="js/script.js"></script>
+
+</body>
+</html>

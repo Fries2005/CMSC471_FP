@@ -1,0 +1,268 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    overflow-x: hidden;
+}
+
+body {
+    margin: 0;
+    background: radial-gradient(circle at top, #1d1d1d 0%, #121212 45%, #0f0f0f 100%);
+}
+
+.story-page {
+    width: min(1200px, calc(100vw - 40px));
+    margin: 0 auto;
+    padding: 28px 0 36px;
+}
+
+.story-hero {
+    margin-bottom: 20px;
+}
+
+.eyebrow {
+    margin: 0 0 8px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9adab2;
+}
+
+.story-hero h1 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 44px);
+    line-height: 1.1;
+}
+
+.subtitle {
+    margin: 12px 0 0;
+    max-width: 900px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #d4d4d4;
+}
+
+.story-text {
+    margin: 0 0 22px;
+    padding: 18px 20px;
+    border: 1px solid #2f2f2f;
+    border-radius: 12px;
+    background: rgba(24, 24, 24, 0.9);
+}
+
+.story-text h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+
+.story-text p {
+    margin: 8px 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #cfcfcf;
+}
+
+.viz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.viz-card {
+    border: 1px solid #333;
+    border-radius: 14px;
+    background: #1a1a1a;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+}
+
+.viz-card-featured {
+    grid-column: 1 / -1;
+}
+
+.viz-card-header {
+    padding: 14px 14px 8px;
+}
+
+.viz-card-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.viz-card-header p {
+    margin: 6px 0 0;
+    color: #bcbcbc;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.viz-card-placeholder {
+    min-height: 160px;
+}
+
+.viz-card-placeholder .viz-card-header {
+    padding-bottom: 16px;
+}
+
+#viz-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+    min-height: 560px;
+    padding: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.tsne-chart-panel {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.tsne-chart-panel svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.tsne-legend-panel {
+    flex: 0 0 168px;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 4px 2px 4px 10px;
+    border-left: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tsne-legend-panel .legend-genre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+    padding: 6px 8px;
+    border: none;
+    border-radius: 6px;
+    background: #242424;
+    color: #e0e0e0;
+    font: inherit;
+    font-size: 11px;
+    text-align: left;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.tsne-legend-panel .legend-genre:hover {
+    background: #2e2e2e;
+}
+
+.tsne-legend-panel .legend-toggle-all {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #1f3a2b;
+    color: #d7ffe7;
+    border: 1px solid #2f5a42;
+    margin-bottom: 6px;
+}
+
+.tsne-legend-panel .legend-toggle-all:hover {
+    background: #244733;
+}
+
+.tsne-legend-panel .legend-genre.is-hidden {
+    opacity: 0.45;
+}
+
+.tsne-legend-panel .legend-genre.is-hidden .legend-swatch {
+    opacity: 0.35;
+}
+
+.tsne-legend-panel .legend-genre.is-hidden .legend-label {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.tsne-legend-panel .legend-swatch {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid #121212;
+}
+
+.tsne-legend-panel .legend-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.viz-error {
+    margin: 0;
+}
+
+/* Tooltip styling */
+.tooltip {
+    position: absolute;
+    text-align: left;
+    padding: 12px;
+    font-size: 13px;
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid #404040;
+    border-radius: 8px;
+    pointer-events: none;
+    opacity: 0;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+    transition: opacity 0.15s ease;
+    color: #e0e0e0;
+    z-index: 10;
+}
+
+.tooltip .genre {
+    color: #1DB954; /* Spotify Green */
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.tooltip .title {
+    font-weight: 700;
+    font-size: 15px;
+    color: #ffffff;
+    margin-bottom: 2px;
+}
+
+.tooltip .artist {
+    color: #b3b3b3;
+}
+
+@media (max-width: 800px) {
+    #viz-container {
+        flex-direction: column;
+        min-height: 540px;
+    }
+
+    .tsne-legend-panel {
+        flex: 0 0 auto;
+        max-height: 140px;
+        border-left: none;
+        border-top: 1px solid #333;
+        padding: 8px 2px 4px 2px;
+    }
+}
