@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Decoding Genre Through Data</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.7/build/d3.layout.cloud.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -43,11 +46,12 @@
                 </div>
             </article>
 
-            <article class="viz-card viz-card-placeholder">
+            <article class="viz-card viz-card-wordcloud">
                 <div class="viz-card-header">
-                    <h3>Placeholder 1</h3>
-                    <p>Add a word cloud or top terms chart to compare lyrical vocabulary across genres.</p>
+                    <h3>Lyrical DNA by Genre</h3>
+                    <p>Top words from song lyrics for each genre — larger words appear more frequently. Common filler, structure, and stop words are filtered out.</p>
                 </div>
+                <div id="wc-grid" class="wc-grid"></div>
             </article>
 
             <article class="viz-card viz-card-placeholder">
@@ -62,6 +66,7 @@
     <div id="tooltip" class="tooltip"></div>
 
     <script src="js/script.js"></script>
+    <script src="js/wordcloud.js"></script>
 
 </body>
 </html>
