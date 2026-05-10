@@ -9,6 +9,44 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* ── Interactive patch (word-cloud ↔ t-SNE ↔ song panel) ─────────── */
+
+        /* Word-cloud card states */
+        .wc-card {
+            transition: opacity 0.25s ease, transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .wc-card--active {
+            outline: 2px solid rgba(255,255,255,0.55);
+            outline-offset: 3px;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+            z-index: 2;
+            position: relative;
+        }
+        .wc-card--dimmed { opacity: 0.28; }
+        .wc-card--selected {
+            outline: 2px solid rgba(255,255,255,0.85);
+            outline-offset: 3px;
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.12), 0 8px 32px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 3;
+        }
+        .wc-label { transition: opacity 0.15s ease; }
+        .wc-label:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+        /* t-SNE legend isolation state */
+        button.legend-genre--isolated {
+            opacity: 0.3;
+            transition: opacity 0.25s ease;
+        }
+        button.legend-genre-item:not(.legend-genre--isolated) {
+            transition: opacity 0.25s ease;
+        }
+
+        /* Tooltip enhancements */
+        #tooltip strong { display: block; margin-bottom: 2px; font-size: 13px; }
+    </style>
 </head>
 <body>
 
@@ -38,7 +76,7 @@
             <article class="viz-card viz-card-featured">
                 <div class="viz-card-header">
                     <h3>t-SNE Genre Clustering</h3>
-                    <p>Songs projected into 2D space by feature similarity. Use zoom, pan, and click legend genres to filter.</p>
+                    <p>Songs projected into 2D space by feature similarity. Click any dot to explore that song. Use zoom, pan, and click legend genres to filter.</p>
                 </div>
                 <div id="viz-container" class="viz-shell">
                     <div id="tsne-chart" class="tsne-chart-panel" aria-label="t-SNE scatter plot"></div>
@@ -49,7 +87,7 @@
             <article class="viz-card viz-card-wordcloud">
                 <div class="viz-card-header">
                     <h3>Lyrical DNA by Genre</h3>
-                    <p>Top words from song lyrics for each genre — larger words appear more frequently. Common filler, structure, and stop words are filtered out.</p>
+                    <p>Top words from song lyrics for each genre. Click a word to highlight matching songs in the t-SNE. Click a genre label to isolate it.</p>
                 </div>
                 <div id="wc-grid" class="wc-grid"></div>
             </article>
@@ -65,8 +103,10 @@
 
     <div id="tooltip" class="tooltip"></div>
 
+    <!-- Load order: event bus lives in script.js, panel listens to it -->
     <script src="js/script.js"></script>
     <script src="js/wordcloud.js"></script>
+    <script src="js/songpanel.js"></script>
 
 </body>
 </html>

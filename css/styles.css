@@ -340,3 +340,72 @@ body {
         padding: 8px 2px 4px 2px;
     }
 }
+
+/* ── styles-interactive-patch.css ────────────────────────────────────────────
+   Append this to your existing css/styles.css.
+   Handles bidirectional t-SNE ↔ word-cloud interaction states.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Word-cloud card states ─────────────────────────────────────────────── */
+
+/* Highlighted when its genre is hovered in the t-SNE legend */
+.wc-card--active {
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 3px;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, outline 0.18s ease;
+  z-index: 2;
+  position: relative;
+}
+
+/* Faded when another genre is hovered in t-SNE */
+.wc-card--dimmed {
+  opacity: 0.28;
+  transition: opacity 0.2s ease;
+}
+
+/* Pulsed ring when a word in this card was clicked */
+.wc-card--selected {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12), 0 8px 32px rgba(0, 0, 0, 0.5);
+  position: relative;
+  z-index: 3;
+}
+
+/* Smooth default transition on all wc-cards */
+.wc-card {
+  transition: opacity 0.25s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* Word-cloud label — show pointer affordance with underline on hover */
+.wc-label {
+  transition: opacity 0.15s ease;
+}
+.wc-label:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── t-SNE legend: isolation state ──────────────────────────────────────── */
+/* When a word-cloud word is clicked, non-target genres dim in the legend */
+button.legend-genre--isolated {
+  opacity: 0.3;
+  transition: opacity 0.25s ease;
+}
+button.legend-genre-item:not(.legend-genre--isolated) {
+  transition: opacity 0.25s ease;
+}
+
+/* ── Tooltip enhancements ───────────────────────────────────────────────── */
+/* The existing #tooltip styles get these additions */
+#tooltip strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 13px;
+}
+#tooltip span {
+  /* already inline, just ensure color inheritance */
+  font-size: 11px;
+}
