@@ -64,6 +64,25 @@
     "bro","bruh","fam","yo","fr","rn","tbh","lmao","lol",
   ]);
 
+  // ── Display label override: maps internal genre key → human-readable label ──
+  var GENRE_DISPLAY_LABELS = {
+    "rb": "R&B",
+  };
+
+  function genreDisplayLabel(genre) {
+    return GENRE_DISPLAY_LABELS[genre] || genre.toUpperCase();
+  }
+
+  // ── Genre key normalisation: maps word-cloud CSV tag → t-SNE CSV genre value ──
+  // If the two CSVs use different strings for the same genre, add a mapping here.
+  var GENRE_KEY_MAP = {
+    "rb": "r&b",   // word-cloud tag "rb"  →  t-SNE genre "r&b"
+  };
+
+  function tsneGenreKey(tag) {
+    return GENRE_KEY_MAP[tag] !== undefined ? GENRE_KEY_MAP[tag] : tag;
+  }
+
   function tokenize(text) {
     return text
       .toLowerCase()
@@ -130,6 +149,7 @@
   var genreCards     = new Map();   // genre → card element
   var genreTextSels  = new Map();   // genre → d3 selection of text nodes
   var activeWordFilter = null;      // { genre, word } | null
+  var isolatedGenre    = null;      // genre key currently isolated via genre-click | null
 
   d3.csv("./data/song_lyrics_short.csv").then(function(rows) {
 
@@ -184,13 +204,38 @@
 
       var label = document.createElement("div");
       label.className = "wc-label";
-      label.textContent = genre.toUpperCase();
+      // Use the display label (e.g. "R&B" instead of "RB")
+      label.textContent = genreDisplayLabel(genre);
       var labelColor = (PALETTES[genre] || DEFAULT_PALETTE)[0];
       label.style.color = labelColor;
-      label.title = "Click to focus " + genre + " in t-SNE";
+      label.title = "Click to focus " + genreDisplayLabel(genre) + " in t-SNE";
       label.style.cursor = "pointer";
       label.addEventListener("click", function() {
-        window.genreEvents.emit("wordcloud:genreClick", { genre: genre });
+        // Toggle: if this genre is already isolated, clicking again clears it
+        var wasIsolated = isolatedGenre === genre;
+        isolatedGenre = wasIsolated ? null : genre;
+
+        // Update isolated visual state across all cards
+        genreCards.forEach(function(c, g) {
+          c.classList.remove("wc-card--genre-isolated");
+          c.classList.remove("wc-card--genre-nonisolated");
+        });
+
+        if (isolatedGenre !== null) {
+          genreCards.forEach(function(c, g) {
+            if (g === isolatedGenre) {
+              c.classList.add("wc-card--genre-isolated");
+            } else {
+              c.classList.add("wc-card--genre-nonisolated");
+            }
+          });
+        }
+
+        // Also clear any active word filter when toggling genre isolation
+        activeWordFilter = null;
+
+        // Emit using the t-SNE-side genre key so the two visualisations stay in sync
+        window.genreEvents.emit("wordcloud:genreClick", { genre: wasIsolated ? null : tsneGenreKey(genre) });
       });
       card.appendChild(label);
 
@@ -267,7 +312,7 @@
               tooltip.style("opacity", 1).style("display", "block")
                 .html(
                   "<strong>" + d.text + "</strong><br/>" +
-                  "<span style='color:#aaa;font-size:11px'>in " + genre.toUpperCase() + "</span><br/>" +
+                  "<span style='color:#aaa;font-size:11px'>in " + genreDisplayLabel(genre) + "</span><br/>" +
                   "Rank: #" + d.rank + " &nbsp;·&nbsp; Count: " + d.rawCount + "<br/>" +
                   "~" + d.pct + "% of lyrics"
                 )
@@ -298,6 +343,13 @@
               activeWordFilter.genre === genre &&
               activeWordFilter.word === d.text;
 
+            // Clicking any word exits genre-isolation mode in the word cloud
+            isolatedGenre = null;
+            genreCards.forEach(function(c) {
+              c.classList.remove("wc-card--genre-isolated");
+              c.classList.remove("wc-card--genre-nonisolated");
+            });
+
             if (isSame) {
               activeWordFilter = null;
               window.genreEvents.emit("wordcloud:wordClick", { genre: null, word: null });
@@ -305,7 +357,8 @@
               card.classList.remove("wc-card--selected");
             } else {
               activeWordFilter = { genre: genre, word: d.text };
-              window.genreEvents.emit("wordcloud:wordClick", { genre: genre, word: d.text });
+              // Emit using the t-SNE-side genre key
+              window.genreEvents.emit("wordcloud:wordClick", { genre: tsneGenreKey(genre), word: d.text });
               texts.transition().duration(200)
                 .style("opacity", function(wd) { return wd.text === d.text ? 1 : 0.18; })
                 .style("filter",  function(wd) { return wd.text === d.text ? "drop-shadow(0 0 8px " + d.color + ")" : "none"; });
@@ -319,6 +372,14 @@
               texts.transition().duration(200).style("opacity", 0.92).style("filter", "none");
               card.classList.remove("wc-card--selected");
             }
+          });
+
+          // ── wordcloud:genreClick fired (from label click) ──
+          // Sync any stale word-highlight state on all cards when a genre is isolated
+          window.genreEvents.on("wordcloud:genreClick", function(payload) {
+            // Reset word-level highlights on every card regardless of which genre was clicked
+            texts.transition().duration(200).style("opacity", 0.92).style("filter", "none");
+            card.classList.remove("wc-card--selected");
           });
 
           // ── panel:wordHighlight → glow matching word ──

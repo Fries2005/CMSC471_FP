@@ -409,3 +409,23 @@ button.legend-genre-item:not(.legend-genre--isolated) {
   /* already inline, just ensure color inheritance */
   font-size: 11px;
 }
+
+/* Add these rules inside the existing <style> block in index.html,
+   alongside the other .wc-card--* rules */
+
+/* Genre-label click: the focused card gets a coloured left-border accent */
+.wc-card--genre-isolated {
+    outline: 2px solid rgba(255, 255, 255, 0.75);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.10), 0 8px 32px rgba(0, 0, 0, 0.5);
+    position: relative;
+    z-index: 3;
+    /* subtle background lift so it reads as "selected" even without a word glow */
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* All other cards fade back when a genre is isolated */
+.wc-card--genre-nonisolated {
+    opacity: 0.28;
+    transition: opacity 0.25s ease;
+}
