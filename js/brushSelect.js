@@ -28,12 +28,19 @@
     "ll","ve","re","s","t","d","m","em","fuck","shit","nigga","niggas","bitch",
   ]);
 
-  const GENRE_COLORS = {
-    "r&b":"#26de81","rap":"#f7b731","rock":"#4b7bec",
-    "pop":"#fd79a8","misc":"#a29bfe","country":"#e17055",
-    "edm":"#81ecec","latin":"#fdcb6e",
-  };
-  function gColor(g) { return GENRE_COLORS[(g||"").toLowerCase()] || "#74b9ff"; }
+  // Use the shared colour map built by script.js so all charts stay in sync.
+  function gColor(g) {
+    if (window.genreColorMap) {
+      return window.genreColorMap.get(g) ||
+             window.genreColorMap.get((g||"").toLowerCase()) ||
+             "#74b9ff";
+    }
+    const FALLBACK = {
+      "r&b":"#26de81","hip-hop":"#f7b731","rock":"#4b7bec","pop":"#fd79a8",
+      "misc":"#a29bfe","country":"#e17055","edm":"#81ecec","latin":"#fdcb6e",
+    };
+    return FALLBACK[(g||"").toLowerCase()] || "#74b9ff";
+  }
 
   function normKey(title, artist) {
     return ((title||"") + "|||" + (artist||"")).toLowerCase();

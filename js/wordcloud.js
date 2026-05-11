@@ -66,7 +66,8 @@
 
   // ── Display label override: maps internal genre key → human-readable label ──
   var GENRE_DISPLAY_LABELS = {
-    "rb": "R&B",
+    "rb":  "R&B",
+    "rap": "Hip-Hop",
   };
 
   function genreDisplayLabel(genre) {
@@ -76,7 +77,8 @@
   // ── Genre key normalisation: maps word-cloud CSV tag → t-SNE CSV genre value ──
   // If the two CSVs use different strings for the same genre, add a mapping here.
   var GENRE_KEY_MAP = {
-    "rb": "r&b",   // word-cloud tag "rb"  →  t-SNE genre "r&b"
+    "rb":  "r&b",     // word-cloud tag "rb"  →  t-SNE genre "r&b"
+    "rap": "hip-hop", // word-cloud tag "rap" →  t-SNE genre "hip-hop"
   };
 
   function tsneGenreKey(tag) {
@@ -109,19 +111,40 @@
       .map(function(e, rank) { return { text: e[0], size: e[1], rank: rank + 1 }; });
   }
 
-  var PALETTES = {
-    rap:     ["#f7b731","#fc5c65","#fd9644","#eb3b5a","#f8c291","#e55039","#ffd32a"],
-    rock:    ["#4b7bec","#778ca3","#a5b1c2","#2d98da","#45aaf2","#d1d8e0","#8854d0"],
-    rb:      ["#26de81","#2bcbba","#0fb9b1","#20bf6b","#45aaf2","#a29bfe","#fd79a8"],
-    pop:     ["#fd79a8","#fdcb6e","#e17055","#ff7675","#fab1a0","#ff4757","#f368e0"],
-    misc:    ["#a29bfe","#6c5ce7","#74b9ff","#0984e3","#dfe6e9","#b2bec3","#81ecec"],
-    country: ["#e17055","#d4a574","#f0b429","#c8a26d","#a0785a","#e88b4a","#f5cba7"],
-  };
-  var DEFAULT_PALETTE = ["#74b9ff","#a29bfe","#fd79a8","#55efc4","#fdcb6e","#e17055","#81ecec"];
+  // ── Colour helpers ────────────────────────────────────────────────────────
+  // Primary genre colour — always sourced from the shared map in script.js so
+  // every chart uses identical colours.
+  // Resolves wordcloud CSV tags (e.g. "rb", "rap") to their t-SNE equivalents
+  // (e.g. "r&b", "hip-hop") via GENRE_KEY_MAP before the colour lookup, so
+  // genres with different names across the two datasets still get the right colour.
+  function genreColor(g) {
+    // Normalise: map wordcloud tag → t-SNE key if a mapping exists
+    var resolved = GENRE_KEY_MAP[g] || GENRE_KEY_MAP[(g||"").toLowerCase()] || g;
+    if (window.genreColorMap) {
+      return window.genreColorMap.get(resolved) ||
+             window.genreColorMap.get((resolved||"").toLowerCase()) ||
+             "#74b9ff";
+    }
+    // Fallback (map not ready yet — shouldn't happen in normal load order)
+    var FALLBACK = {
+      "r&b":"#26de81","hip-hop":"#f7b731","rock":"#4b7bec","pop":"#fd79a8",
+      "misc":"#a29bfe","country":"#e17055","edm":"#81ecec","latin":"#fdcb6e",
+    };
+    return FALLBACK[(resolved||"").toLowerCase()] || "#74b9ff";
+  }
 
+  // Word colours: tint variants derived from the genre's base colour so the
+  // cloud still looks multi-hued but stays visually tied to the genre.
+  var WORD_TINTS = [1.0, 0.82, 0.65, 0.90, 0.72, 0.55, 0.95];
   function pickColor(genre, i) {
-    var pal = PALETTES[genre] || DEFAULT_PALETTE;
-    return pal[i % pal.length];
+    var base = genreColor(genre);
+    // Parse hex → lighten by blending toward white at different ratios
+    var r = parseInt(base.slice(1,3),16),
+        gr= parseInt(base.slice(3,5),16),
+        b = parseInt(base.slice(5,7),16);
+    var t = WORD_TINTS[i % WORD_TINTS.length];
+    var mix = function(c) { return Math.round(c * t + 255 * (1 - t)); };
+    return "rgb(" + mix(r) + "," + mix(gr) + "," + mix(b) + ")";
   }
 
   // ── Event bus ─────────────────────────────────────────────────────────────
@@ -206,7 +229,7 @@
       label.className = "wc-label";
       // Use the display label (e.g. "R&B" instead of "RB")
       label.textContent = genreDisplayLabel(genre);
-      var labelColor = (PALETTES[genre] || DEFAULT_PALETTE)[0];
+      var labelColor = genreColor(genre);
       label.style.color = labelColor;
       label.title = "Click to focus " + genreDisplayLabel(genre) + " in t-SNE";
       label.style.cursor = "pointer";

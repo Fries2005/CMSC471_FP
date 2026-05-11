@@ -156,11 +156,38 @@ Promise.all([
     .domain([yExtent[0] - yPadding, yExtent[1] + yPadding])
     .range([height, 0]);
 
+  // ── Shared deterministic genre colour palette ──────────────────────────────
+  // Exposed as window.genreColorMap so every other module (wordcloud, radar,
+  // violin, brushSelect) can stay perfectly in sync with this chart.
+  var GENRE_COLORS = {
+    "r&b":     "#26de81",
+    "hip-hop": "#f7b731",
+    "rock":    "#4b7bec",
+    "pop":     "#fd79a8",
+    "misc":    "#a29bfe",
+    "country": "#e17055",
+    "edm":     "#81ecec",
+    "latin":   "#fdcb6e",
+  };
+  // Fallback palette for any genre not in the map above
+  var FALLBACK_COLORS = [
+    "#74b9ff","#55efc4","#ff7675","#a29bfe","#ffeaa7",
+    "#00cec9","#fd79a8","#6c5ce7","#fab1a0","#00b894",
+  ];
+
   var genres        = Array.from(new Set(tsneData.map(function(d) { return d.genre; })));
-  var colorScale    = d3.scaleSequential().domain([0, genres.length]).interpolator(d3.interpolateSinebow);
-  var genreColorMap = new Map(genres.map(function(g, idx) { return [g, colorScale(idx)]; }));
+  var genreColorMap = new Map();
+  var _fallbackIdx  = 0;
+  genres.forEach(function(g) {
+    var key = (g || "").toLowerCase().trim();
+    genreColorMap.set(g, GENRE_COLORS[key] || FALLBACK_COLORS[_fallbackIdx++ % FALLBACK_COLORS.length]);
+  });
+  // Expose globally so other modules share the exact same colours
+  window.genreColorMap = genreColorMap;
+
   var genreSorted   = genres.slice().sort(function(a, b) { return a.localeCompare(b); });
   var totalGenres   = genreSorted.length;
+
 
   // ── Opacity helpers ────────────────────────────────────────────────────────
   function clearHoverState() {
