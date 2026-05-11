@@ -16,6 +16,9 @@ features = [
 required_cols = features + ['track_name', 'track_artist', 'playlist_genre']
 df = df.dropna(subset=required_cols)
 
+# Remove duplicates based on track_name
+df = df.drop_duplicates(subset=['track_name'])
+
 X = df[features]
 X_scaled = StandardScaler().fit_transform(X)
 
@@ -49,5 +52,5 @@ viz_df = pd.DataFrame({
     'loudness':         df['loudness'].values,  # raw dB for display
 })
 
-viz_df.to_csv('tsne_data.csv', index=False)
+viz_df.to_csv('data/tsne_data.csv', index=False)
 print("Success! Data saved to tsne_data.csv ready for rendering.")
