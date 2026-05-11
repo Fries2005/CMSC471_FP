@@ -1,436 +1,443 @@
 // ── Word Cloud: Genre Lyrics ──────────────────────────────────────────────────
 // Interactivity:
-//   • Tooltips on each word (rank, count, %).
-//   • Click word → dim other words; emit wordcloud:wordClick (genre+word) to t-SNE.
-//   • Click genre label → emit wordcloud:genreClick; isolate that genre in t-SNE.
-//   • tsne:genreHover → pulse / dim cards.
-//   • panel:wordHighlight { word, genre } → glow matching word in clouds.
-//   • panel:wordClear → reset all cloud highlights.
+//   • Tooltips on each word (rank, count, %).
+//   • Click word → dim other words; emit wordcloud:wordClick (genre+word) to t-SNE.
+//   • Click genre label → emit wordcloud:genreClick; isolate that genre in t-SNE.
+//   • tsne:genreHover → pulse / dim cards.
+//   • panel:wordHighlight { word, genre } → glow matching word in clouds.
+//   • panel:wordClear → reset all cloud highlights.
 
 (function () {
 
-  var STOP_WORDS = new Set([
-    "chorus","verse","bridge","hook","intro","outro","pre","prechorius",
-    "prechorus","pre-chorus","refrain","interlude","instrumental","repeat",
-    "section","tag","coda","break","drop","build","breakdown",
-    "a","an","the","this","that","these","those","some","any","every",
-    "each","all","both","either","neither","no","such","what","which",
-    "whose","whatever","whichever",
-    "i","i'm","i'll","i'd","me","my","myself","we","our","ours","ourselves",
-    "you","your","you're","yours","yourself","yourselves","he","him","his",
-    "himself","she","her","hers","herself","it","its","itself","they","them",
-    "their","theirs","themselves","who","whom","whose","whoever","whomever",
-    "and","but","or","nor","so","yet","for","both","either","neither",
-    "not","only","just","whether","although","though","even","while",
-    "whereas","because","since","as","if","unless","until","when",
-    "whenever","where","wherever","after","before","once","than",
-    "in","on","at","by","for","with","about","against","between",
-    "into","through","during","before","after","above","below","from",
-    "up","down","to","of","off","over","under","again","further",
-    "then","once","out","along","across","behind","beyond","inside",
-    "outside","around","without","within","among","throughout","upon",
-    "onto","per","via","near","beside","besides","except","past",
-    "is","am","are","was","were","be","been","being","have","has","had",
-    "do","don't","can't","does","did","will","won't","would","could","should",
-    "may","might","must","shall","can","need","dare","ought","used","get",
-    "got","gotten","let","make","made","go","goes","went","come","came",
-    "take","took","know","knew","think","thought","see","saw","look","want",
-    "use","try","say","said","tell","told","give","gave","keep","kept",
-    "feel","felt","seem","show","showed","find","found","leave","left",
-    "call","put","set","turn","help","start","move","live","believe","hold",
-    "bring","happen","write","provide","sit","stand","lose","pay","meet",
-    "run","ask","need","stay","play","hear","heard","let","begin","began",
-    "love","loved",
-    "yeah","yea","yep","ok","okay","oh","ah","uh","um","hmm","hm",
-    "na","la","da","ha","hey","ooh","woah","whoa","aye","ay","eh",
-    "nah","ya","gonna","gotta","wanna","kinda","sorta","lotta","lemme",
-    "gimme","tryna","bout","cuz","cos","cause","tho","thru","em",
-    "im","ive","id","its","it's","dont","doesnt","didnt","cant","wont",
-    "wouldnt","couldnt","shouldnt","isnt","arent","wasnt","werent",
-    "havent","hasnt","hadnt","aint","ll","ve","re","s","t","d","m",
-    "like","just","now","still","way","back","time","day","night",
-    "right","left","never","always","ever","here","there","where",
-    "more","most","much","many","little","few","own","same","other",
-    "another","new","old","first","last","long","great","little",
-    "good","bad","real","true","us","no","yes","maybe","really",
-    "very","too","also","only","even","well","else","never","always",
-    "again","already","almost","enough","every","off","away","down",
-    "up","around","something","anything","nothing","everything",
-    "someone","anyone","no one","everyone","somewhere","anywhere",
-    "nowhere","everywhere","thing","things","kind","lot","bit",
-    "fuck","fuckin","fucking","shit","bitch","ass","damn","hell",
-    "nigga","niggas","niggaz","hoe","hoes","ho","dick","cock",
-    "pussy","cunt","bastard","motherfucker","mf","wtf","stfu",
-    "bro","bruh","fam","yo","fr","rn","tbh","lmao","lol",
-  ]);
+  var STOP_WORDS = new Set([
+    "chorus","verse","bridge","hook","intro","outro","pre","prechorius",
+    "prechorus","pre-chorus","refrain","interlude","instrumental","repeat",
+    "section","tag","coda","break","drop","build","breakdown",
+    "a","an","the","this","that","these","those","some","any","every",
+    "each","all","both","either","neither","no","such","what","which",
+    "whose","whatever","whichever",
+    "i","i'm","i'll","i'd","me","my","myself","we","our","ours","ourselves",
+    "you","your","you're","yours","yourself","yourselves","he","him","his",
+    "himself","she","her","hers","herself","it","its","itself","they","them",
+    "their","theirs","themselves","who","whom","whose","whoever","whomever",
+    "and","but","or","nor","so","yet","for","both","either","neither",
+    "not","only","just","whether","although","though","even","while",
+    "whereas","because","since","as","if","unless","until","when",
+    "whenever","where","wherever","after","before","once","than",
+    "in","on","at","by","for","with","about","against","between",
+    "into","through","during","before","after","above","below","from",
+    "up","down","to","of","off","over","under","again","further",
+    "then","once","out","along","across","behind","beyond","inside",
+    "outside","around","without","within","among","throughout","upon",
+    "onto","per","via","near","beside","besides","except","past",
+    "is","am","are","was","were","be","been","being","have","has","had",
+    "do","don't","can't","does","did","will","won't","would","could","should",
+    "may","might","must","shall","can","need","dare","ought","used","get",
+    "got","gotten","let","make","made","go","goes","went","come","came",
+    "take","took","know","knew","think","thought","see","saw","look","want",
+    "use","try","say","said","tell","told","give","gave","keep","kept",
+    "feel","felt","seem","show","showed","find","found","leave","left",
+    "call","put","set","turn","help","start","move","live","believe","hold",
+    "bring","happen","write","provide","sit","stand","lose","pay","meet",
+    "run","ask","need","stay","play","hear","heard","let","begin","began",
+    "love","loved",
+    "yeah","yea","yep","ok","okay","oh","ah","uh","um","hmm","hm",
+    "na","la","da","ha","hey","ooh","woah","whoa","aye","ay","eh",
+    "nah","ya","gonna","gotta","wanna","kinda","sorta","lotta","lemme",
+    "gimme","tryna","bout","cuz","cos","cause","tho","thru","em",
+    "im","ive","id","its","it's","dont","doesnt","didnt","cant","wont",
+    "wouldnt","couldnt","shouldnt","isnt","arent","wasnt","werent",
+    "havent","hasnt","hadnt","aint","ll","ve","re","s","t","d","m",
+    "like","just","now","still","way","back","time","day","night",
+    "right","left","never","always","ever","here","there","where",
+    "more","most","much","many","little","few","own","same","other",
+    "another","new","old","first","last","long","great","little",
+    "good","bad","real","true","us","no","yes","maybe","really",
+    "very","too","also","only","even","well","else","never","always",
+    "again","already","almost","enough","every","off","away","down",
+    "up","around","something","anything","nothing","everything",
+    "someone","anyone","no one","everyone","somewhere","anywhere",
+    "nowhere","everywhere","thing","things","kind","lot","bit",
+    "fuck","fuckin","fucking","shit","bitch","ass","damn","hell",
+    "nigga","niggas","niggaz","hoe","hoes","ho","dick","cock",
+    "pussy","cunt","bastard","motherfucker","mf","wtf","stfu",
+    "bro","bruh","fam","yo","fr","rn","tbh","lmao","lol",
+  ]);
 
-  // ── Display label override: maps internal genre key → human-readable label ──
-  var GENRE_DISPLAY_LABELS = {
-    "rb":  "R&B",
-    "rap": "Hip-Hop",
-  };
+  // ── Display label override: maps internal genre key → human-readable label ──
+  var GENRE_DISPLAY_LABELS = {
+    "rb":  "R&B",
+    "rap": "Hip-Hop",
+  };
 
-  function genreDisplayLabel(genre) {
-    return GENRE_DISPLAY_LABELS[genre] || genre.toUpperCase();
-  }
+  function genreDisplayLabel(genre) {
+    return GENRE_DISPLAY_LABELS[genre] || genre.toUpperCase();
+  }
 
-  // ── Genre key normalisation: maps word-cloud CSV tag → t-SNE CSV genre value ──
-  // If the two CSVs use different strings for the same genre, add a mapping here.
-  var GENRE_KEY_MAP = {
-    "rb":  "r&b",     // word-cloud tag "rb"  →  t-SNE genre "r&b"
-    "rap": "hip-hop", // word-cloud tag "rap" →  t-SNE genre "hip-hop"
-  };
+  // ── Genre key normalisation: maps word-cloud CSV tag → t-SNE CSV genre value ──
+  // If the two CSVs use different strings for the same genre, add a mapping here.
+  var GENRE_KEY_MAP = {
+    "rb":  "r&b",     // word-cloud tag "rb"  →  t-SNE genre "r&b"
+    "rap": "hip-hop", // word-cloud tag "rap" →  t-SNE genre "hip-hop"
+  };
 
-  function tsneGenreKey(tag) {
-    return GENRE_KEY_MAP[tag] !== undefined ? GENRE_KEY_MAP[tag] : tag;
-  }
+  function tsneGenreKey(tag) {
+    return GENRE_KEY_MAP[tag] !== undefined ? GENRE_KEY_MAP[tag] : tag;
+  }
 
-  function tokenize(text) {
-    return text
-      .toLowerCase()
-      .replace(/\[.*?\]/g, " ")
-      .replace(/[^a-z']+/g, " ")
-      .replace(/\s'+|'+\s/g, " ")
-      .split(/\s+/)
-      .filter(function(w) { return w.length > 2 && !STOP_WORDS.has(w); });
-  }
+  function tokenize(text) {
+    return text
+      .toLowerCase()
+      .replace(/\[.*?\]/g, " ")
+      .replace(/[^a-z']+/g, " ")
+      .replace(/\s'+|'+\s/g, " ")
+      .split(/\s+/)
+      .filter(function(w) { return w.length > 2 && !STOP_WORDS.has(w); });
+  }
 
-  function wordFreq(tokens) {
-    var freq = {};
-    for (var i = 0; i < tokens.length; i++) {
-      var w = tokens[i];
-      freq[w] = (freq[w] || 0) + 1;
-    }
-    return freq;
-  }
+  function wordFreq(tokens) {
+    var freq = {};
+    for (var i = 0; i < tokens.length; i++) {
+      var w = tokens[i];
+      freq[w] = (freq[w] || 0) + 1;
+    }
+    return freq;
+  }
 
-  function topN(freq, n) {
-    return Object.entries(freq)
-      .sort(function(a, b) { return b[1] - a[1]; })
-      .slice(0, n || 60)
-      .map(function(e, rank) { return { text: e[0], size: e[1], rank: rank + 1 }; });
-  }
+  function topN(freq, n) {
+    return Object.entries(freq)
+      .sort(function(a, b) { return b[1] - a[1]; })
+      .slice(0, n || 60)
+      .map(function(e, rank) { return { text: e[0], size: e[1], rank: rank + 1 }; });
+  }
 
-  // ── Colour helpers ────────────────────────────────────────────────────────
-  // Primary genre colour — always sourced from the shared map in script.js so
-  // every chart uses identical colours.
-  // Resolves wordcloud CSV tags (e.g. "rb", "rap") to their t-SNE equivalents
-  // (e.g. "r&b", "hip-hop") via GENRE_KEY_MAP before the colour lookup, so
-  // genres with different names across the two datasets still get the right colour.
-  function genreColor(g) {
-    // Normalise: map wordcloud tag → t-SNE key if a mapping exists
-    var resolved = GENRE_KEY_MAP[g] || GENRE_KEY_MAP[(g||"").toLowerCase()] || g;
-    if (window.genreColorMap) {
-      return window.genreColorMap.get(resolved) ||
-             window.genreColorMap.get((resolved||"").toLowerCase()) ||
-             "#74b9ff";
-    }
-    // Fallback (map not ready yet — shouldn't happen in normal load order)
-    var FALLBACK = {
-      "r&b":"#26de81","hip-hop":"#f7b731","rock":"#4b7bec","pop":"#fd79a8",
-      "misc":"#a29bfe","country":"#e17055","edm":"#81ecec","latin":"#fdcb6e",
-    };
-    return FALLBACK[(resolved||"").toLowerCase()] || "#74b9ff";
-  }
+  // ── Colour helpers ────────────────────────────────────────────────────────
+  // Primary genre colour — always sourced from the shared map in script.js so
+  // every chart uses identical colours.
+  // Resolves wordcloud CSV tags (e.g. "rb", "rap") to their t-SNE equivalents
+  // (e.g. "r&b", "hip-hop") via GENRE_KEY_MAP before the colour lookup, so
+  // genres with different names across the two datasets still get the right colour.
+  function genreColor(g) {
+    // Normalise: map wordcloud tag → t-SNE key if a mapping exists
+    var resolved = GENRE_KEY_MAP[g] || GENRE_KEY_MAP[(g||"").toLowerCase()] || g;
+    if (window.genreColorMap) {
+      return window.genreColorMap.get(resolved) ||
+             window.genreColorMap.get((resolved||"").toLowerCase()) ||
+             "#74b9ff";
+    }
+    // Fallback (map not ready yet — shouldn't happen in normal load order)
+    var FALLBACK = {
+      "r&b":"#26de81","hip-hop":"#f7b731","rock":"#4b7bec","pop":"#fd79a8",
+      "misc":"#a29bfe","country":"#e17055","edm":"#81ecec","latin":"#fdcb6e",
+    };
+    return FALLBACK[(resolved||"").toLowerCase()] || "#74b9ff";
+  }
 
-  // Word colours: tint variants derived from the genre's base colour so the
-  // cloud still looks multi-hued but stays visually tied to the genre.
-  var WORD_TINTS = [1.0, 0.82, 0.65, 0.90, 0.72, 0.55, 0.95];
-  function pickColor(genre, i) {
-    var base = genreColor(genre);
-    // Parse hex → lighten by blending toward white at different ratios
-    var r = parseInt(base.slice(1,3),16),
-        gr= parseInt(base.slice(3,5),16),
-        b = parseInt(base.slice(5,7),16);
-    var t = WORD_TINTS[i % WORD_TINTS.length];
-    var mix = function(c) { return Math.round(c * t + 255 * (1 - t)); };
-    return "rgb(" + mix(r) + "," + mix(gr) + "," + mix(b) + ")";
-  }
+  // Word colours: tint variants derived from the genre's base colour so the
+  // cloud still looks multi-hued but stays visually tied to the genre.
+  var WORD_TINTS = [1.0, 0.82, 0.65, 0.90, 0.72, 0.55, 0.95];
+  function pickColor(genre, i) {
+    var base = genreColor(genre);
+    // Parse hex → lighten by blending toward white at different ratios
+    var r = parseInt(base.slice(1,3),16),
+        gr= parseInt(base.slice(3,5),16),
+        b = parseInt(base.slice(5,7),16);
+    var t = WORD_TINTS[i % WORD_TINTS.length];
+    var mix = function(c) { return Math.round(c * t + 255 * (1 - t)); };
+    return "rgb(" + mix(r) + "," + mix(gr) + "," + mix(b) + ")";
+  }
 
-  // ── Event bus ─────────────────────────────────────────────────────────────
-  if (!window.genreEvents) {
-    window.genreEvents = {
-      _listeners: {},
-      on: function(event, fn) {
-        if (!this._listeners[event]) this._listeners[event] = [];
-        this._listeners[event].push(fn);
-      },
-      emit: function(event, data) {
-        (this._listeners[event] || []).forEach(function(fn) { fn(data); });
-      }
-    };
-  }
+  // ── Event bus ─────────────────────────────────────────────────────────────
+  if (!window.genreEvents) {
+    window.genreEvents = {
+      _listeners: {},
+      on: function(event, fn) {
+        if (!this._listeners[event]) this._listeners[event] = [];
+        this._listeners[event].push(fn);
+      },
+      emit: function(event, data) {
+        (this._listeners[event] || []).forEach(function(fn) { fn(data); });
+      }
+    };
+  }
 
-  var tooltip = d3.select("#tooltip");
+  var tooltip = d3.select("#tooltip");
 
-  // ── Main ──────────────────────────────────────────────────────────────────
-  var container = document.getElementById("wc-grid");
-  if (!container) return;
-  container.innerHTML = '<p class="wc-loading">Loading lyrics data…</p>';
+  // ── Main ──────────────────────────────────────────────────────────────────
+  var container = document.getElementById("wc-grid");
+  if (!container) return;
+  container.innerHTML = '<p class="wc-loading">Loading lyrics data…</p>';
 
-  // Maps for cross-card communication
-  var genreCards     = new Map();   // genre → card element
-  var genreTextSels  = new Map();   // genre → d3 selection of text nodes
-  var activeWordFilter = null;      // { genre, word } | null
-  var isolatedGenre    = null;      // genre key currently isolated via genre-click | null
+  // Maps for cross-card communication
+  var genreCards     = new Map();   // genre → card element
+  var genreTextSels  = new Map();   // genre → d3 selection of text nodes
+  var activeWordFilter = null;      // { genre, word } | null
+  var isolatedGenre    = null;      // genre key currently isolated via genre-click | null
 
-  d3.csv("./data/song_lyrics_short.csv").then(function(rows) {
+  // Wait for data to be loaded by script.js
+  function initWordclouds() {
+    if (!window.tsneData) {
+      setTimeout(initWordclouds, 100);
+      return;
+    }
 
-    var byGenre = {};
-    for (var i = 0; i < rows.length; i++) {
-      var row = rows[i];
-      var tag = (row.tag || "").trim().toLowerCase();
-      if (!tag) continue;
-      if (!byGenre[tag]) byGenre[tag] = [];
-      byGenre[tag].push(row.lyrics || "");
-    }
+    // Group lyrics by genre from the already-loaded tsneData
+    var rows = window.tsneData;
+    var byGenre = {};
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      var genre = (row.genre || "").trim().toLowerCase();
+      if (!genre) continue;
+      if (!byGenre[genre]) byGenre[genre] = [];
+      if (row.lyrics) byGenre[genre].push(row.lyrics);
+    }
 
-    var genres = Object.entries(byGenre)
-      .sort(function(a, b) { return b[1].length - a[1].length; })
-      .slice(0, 20)
-      .map(function(e) { return e[0]; });
+    var genres = Object.entries(byGenre)
+      .sort(function(a, b) { return b[1].length - a[1].length; })
+      .slice(0, 20)
+      .map(function(e) { return e[0]; });
 
-    container.innerHTML = "";
-    var COLS = Math.min(5, genres.length);
-    container.style.setProperty("--wc-cols", COLS);
+    container.innerHTML = "";
+    var COLS = Math.min(5, genres.length);
+    container.style.setProperty("--wc-cols", COLS);
 
-    genres.forEach(function(genre) {
-      var allText    = byGenre[genre].join(" ");
-      var tokens     = tokenize(allText);
-      var freq       = wordFreq(tokens);
-      var words      = topN(freq, 60);
-      var totalToks  = tokens.length;
+    genres.forEach(function(genre) {
+      var allText    = byGenre[genre].join(" ");
+      var tokens     = tokenize(allText);
+      var freq       = wordFreq(tokens);
+      var words      = topN(freq, 60);
+      var totalToks  = tokens.length;
 
-      if (!words.length) return;
+      if (!words.length) return;
 
-      var maxF = words[0].size;
-      var minF = words[words.length - 1].size;
-      var SIZE_MAX = 38, SIZE_MIN = 10;
+      var maxF = words[0].size;
+      var minF = words[words.length - 1].size;
+      var SIZE_MAX = 38, SIZE_MIN = 10;
 
-      var sized = words.map(function(w, i) {
-        return {
-          text:     w.text,
-          rawCount: w.size,
-          rank:     w.rank,
-          pct:      ((w.size / totalToks) * 100).toFixed(2),
-          size:     minF === maxF
-            ? SIZE_MAX
-            : SIZE_MIN + (SIZE_MAX - SIZE_MIN) * Math.sqrt((w.size - minF) / (maxF - minF)),
-          color: pickColor(genre, i),
-        };
-      });
+      var sized = words.map(function(w, i) {
+        return {
+          text:     w.text,
+          rawCount: w.size,
+          rank:     w.rank,
+          pct:      ((w.size / totalToks) * 100).toFixed(2),
+          size:     minF === maxF
+            ? SIZE_MAX
+            : SIZE_MIN + (SIZE_MAX - SIZE_MIN) * Math.sqrt((w.size - minF) / (maxF - minF)),
+          color: pickColor(genre, i),
+        };
+      });
 
-      // ── Card DOM ──
-      var card = document.createElement("div");
-      card.className = "wc-card";
-      card.dataset.genre = genre;
+      // ── Card DOM ──
+      var card = document.createElement("div");
+      card.className = "wc-card";
+      card.dataset.genre = genre;
 
-      var label = document.createElement("div");
-      label.className = "wc-label";
-      // Use the display label (e.g. "R&B" instead of "RB")
-      label.textContent = genreDisplayLabel(genre);
-      var labelColor = genreColor(genre);
-      label.style.color = labelColor;
-      label.title = "Click to focus " + genreDisplayLabel(genre) + " in t-SNE";
-      label.style.cursor = "pointer";
-      label.addEventListener("click", function() {
-        // Toggle: if this genre is already isolated, clicking again clears it
-        var wasIsolated = isolatedGenre === genre;
-        isolatedGenre = wasIsolated ? null : genre;
+      var label = document.createElement("div");
+      label.className = "wc-label";
+      // Use the display label (e.g. "R&B" instead of "RB")
+      label.textContent = genreDisplayLabel(genre);
+      var labelColor = genreColor(genre);
+      label.style.color = labelColor;
+      label.title = "Click to focus " + genreDisplayLabel(genre) + " in t-SNE";
+      label.style.cursor = "pointer";
+      label.addEventListener("click", function() {
+        // Toggle: if this genre is already isolated, clicking again clears it
+        var wasIsolated = isolatedGenre === genre;
+        isolatedGenre = wasIsolated ? null : genre;
 
-        // Update isolated visual state across all cards
-        genreCards.forEach(function(c, g) {
-          c.classList.remove("wc-card--genre-isolated");
-          c.classList.remove("wc-card--genre-nonisolated");
-        });
+        // Update isolated visual state across all cards
+        genreCards.forEach(function(c, g) {
+          c.classList.remove("wc-card--genre-isolated");
+          c.classList.remove("wc-card--genre-nonisolated");
+        });
 
-        if (isolatedGenre !== null) {
-          genreCards.forEach(function(c, g) {
-            if (g === isolatedGenre) {
-              c.classList.add("wc-card--genre-isolated");
-            } else {
-              c.classList.add("wc-card--genre-nonisolated");
-            }
-          });
-        }
+        if (isolatedGenre !== null) {
+          genreCards.forEach(function(c, g) {
+            if (g === isolatedGenre) {
+              c.classList.add("wc-card--genre-isolated");
+            } else {
+              c.classList.add("wc-card--genre-nonisolated");
+            }
+          });
+        }
 
-        // Also clear any active word filter when toggling genre isolation
-        activeWordFilter = null;
+        // Also clear any active word filter when toggling genre isolation
+        activeWordFilter = null;
 
-        // Emit using the t-SNE-side genre key so the two visualisations stay in sync
-        window.genreEvents.emit("wordcloud:genreClick", { genre: wasIsolated ? null : tsneGenreKey(genre) });
-      });
-      card.appendChild(label);
+        // Emit using the t-SNE-side genre key so the two visualisations stay in sync
+        window.genreEvents.emit("wordcloud:genreClick", { genre: wasIsolated ? null : tsneGenreKey(genre) });
+      });
+      card.appendChild(label);
 
-      var svgWrap = document.createElement("div");
-      svgWrap.className = "wc-svg-wrap";
-      card.appendChild(svgWrap);
-      container.appendChild(card);
+      var svgWrap = document.createElement("div");
+      svgWrap.className = "wc-svg-wrap";
+      card.appendChild(svgWrap);
+      container.appendChild(card);
 
-      genreCards.set(genre, card);
+      genreCards.set(genre, card);
 
-      // ── t-SNE legend hover → card highlight ──
-      window.genreEvents.on("tsne:genreHover", function(payload) {
-        var g = payload.genre;
-        card.classList.toggle("wc-card--active",  g === genre);
-        card.classList.toggle("wc-card--dimmed",  g !== null && g !== genre);
-      });
-      window.genreEvents.on("tsne:genreLeave", function() {
-        card.classList.remove("wc-card--active", "wc-card--dimmed");
-      });
+      // ── t-SNE legend hover → card highlight ──
+      window.genreEvents.on("tsne:genreHover", function(payload) {
+        var g = payload.genre;
+        card.classList.toggle("wc-card--active",  g === genre);
+        card.classList.toggle("wc-card--dimmed",  g !== null && g !== genre);
+      });
+      window.genreEvents.on("tsne:genreLeave", function() {
+        card.classList.remove("wc-card--active", "wc-card--dimmed");
+      });
 
-      // ── Build word cloud ──
-      requestAnimationFrame(function() {
-        var W = svgWrap.clientWidth  || 220;
-        var H = svgWrap.clientHeight || 180;
+      // ── Build word cloud ──
+      requestAnimationFrame(function() {
+        var W = svgWrap.clientWidth  || 220;
+        var H = svgWrap.clientHeight || 180;
 
-        var layout = d3.layout.cloud()
-          .size([W, H])
-          .words(sized)
-          .padding(2)
-          .rotate(function() { return Math.random() < 0.7 ? 0 : (Math.random() < 0.5 ? 90 : -90); })
-          .font("'DM Sans', sans-serif")
-          .fontWeight(function(d) { return d.size > 22 ? "700" : "500"; })
-          .fontSize(function(d) { return d.size; })
-          .on("end", draw);
+        var layout = d3.layout.cloud()
+          .size([W, H])
+          .words(sized)
+          .padding(2)
+          .rotate(function() { return Math.random() < 0.7 ? 0 : (Math.random() < 0.5 ? 90 : -90); })
+          .font("'DM Sans', sans-serif")
+          .fontWeight(function(d) { return d.size > 22 ? "700" : "500"; })
+          .fontSize(function(d) { return d.size; })
+          .on("end", draw);
 
-        layout.start();
+        layout.start();
 
-        function draw(placedWords) {
-          var svgEl = d3.select(svgWrap).append("svg")
-            .attr("width", W).attr("height", H)
-            .attr("viewBox", (-W/2) + " " + (-H/2) + " " + W + " " + H)
-            .attr("preserveAspectRatio", "xMidYMid meet");
+        function draw(placedWords) {
+          var svgEl = d3.select(svgWrap).append("svg")
+            .attr("width", W).attr("height", H)
+            .attr("viewBox", (-W/2) + " " + (-H/2) + " " + W + " " + H)
+            .attr("preserveAspectRatio", "xMidYMid meet");
 
-          var texts = svgEl.append("g")
-            .selectAll("text")
-            .data(placedWords)
-            .enter()
-            .append("text")
-            .style("font-family", "'DM Sans', sans-serif")
-            .style("font-size",   function(d) { return d.size + "px"; })
-            .style("font-weight", function(d) { return d.size > 22 ? "700" : "500"; })
-            .style("fill",        function(d) { return d.color; })
-            .style("opacity", 0)
-            .style("cursor", "pointer")
-            .attr("text-anchor", "middle")
-            .attr("transform",   function(d) { return "translate(" + d.x + "," + d.y + ") rotate(" + d.rotate + ")"; })
-            .text(function(d) { return d.text; });
+          var texts = svgEl.append("g")
+            .selectAll("text")
+            .data(placedWords)
+            .enter()
+            .append("text")
+            .style("font-family", "'DM Sans', sans-serif")
+            .style("font-size",   function(d) { return d.size + "px"; })
+            .style("font-weight", function(d) { return d.size > 22 ? "700" : "500"; })
+            .style("fill",        function(d) { return d.color; })
+            .style("opacity", 0)
+            .style("cursor", "pointer")
+            .attr("text-anchor", "middle")
+            .attr("transform",   function(d) { return "translate(" + d.x + "," + d.y + ") rotate(" + d.rotate + ")"; })
+            .text(function(d) { return d.text; });
 
-          // Store selection for external highlight
-          genreTextSels.set(genre, texts);
+          // Store selection for external highlight
+          genreTextSels.set(genre, texts);
 
-          // Entrance
-          texts.transition()
-            .delay(function(_, i) { return i * 18; })
-            .duration(400)
-            .style("opacity", 0.92);
+          // Entrance
+          texts.transition()
+            .delay(function(_, i) { return i * 18; })
+            .duration(400)
+            .style("opacity", 0.92);
 
-          // ── Tooltip ──
-          texts
-            .on("mouseover", function(event, d) {
-              d3.select(this).transition().duration(120)
-                .style("opacity", 1)
-                .style("filter", "drop-shadow(0 0 6px " + d.color + ")");
-              tooltip.style("opacity", 1).style("display", "block")
-                .html(
-                  "<strong>" + d.text + "</strong><br/>" +
-                  "<span style='color:#aaa;font-size:11px'>in " + genreDisplayLabel(genre) + "</span><br/>" +
-                  "Rank: #" + d.rank + " &nbsp;·&nbsp; Count: " + d.rawCount + "<br/>" +
-                  "~" + d.pct + "% of lyrics"
-                )
-                .style("left", (event.pageX + 15) + "px")
-                .style("top",  (event.pageY - 20) + "px");
-            })
-            .on("mousemove", function(event) {
-              tooltip.style("left", (event.pageX + 15) + "px")
-                     .style("top",  (event.pageY - 20) + "px");
-            })
-            .on("mouseout", function(event, d) {
-              // Only reset if this word isn't the active filter
-              var isActive = activeWordFilter &&
-                activeWordFilter.genre === genre &&
-                activeWordFilter.word === d.text;
-              if (!isActive) {
-                d3.select(this).transition().duration(200)
-                  .style("opacity", 0.92)
-                  .style("filter", "none");
-              }
-              tooltip.style("opacity", 0).style("display", "none");
-            });
+          // ── Tooltip ──
+          texts
+            .on("mouseover", function(event, d) {
+              d3.select(this).transition().duration(120)
+                .style("opacity", 1)
+                .style("filter", "drop-shadow(0 0 6px " + d.color + ")");
+              tooltip.style("opacity", 1).style("display", "block")
+                .html(
+                  "<strong>" + d.text + "</strong><br/>" +
+                  "<span style='color:#aaa;font-size:11px'>in " + genreDisplayLabel(genre) + "</span><br/>" +
+                  "Rank: #" + d.rank + " &nbsp;·&nbsp; Count: " + d.rawCount + "<br/>" +
+                  "~" + d.pct + "% of lyrics"
+                )
+                .style("left", (event.pageX + 15) + "px")
+                .style("top",  (event.pageY - 20) + "px");
+            })
+            .on("mousemove", function(event) {
+              tooltip.style("left", (event.pageX + 15) + "px")
+                     .style("top",  (event.pageY - 20) + "px");
+            })
+            .on("mouseout", function(event, d) {
+              // Only reset if this word isn't the active filter
+              var isActive = activeWordFilter &&
+                activeWordFilter.genre === genre &&
+                activeWordFilter.word === d.text;
+              if (!isActive) {
+                d3.select(this).transition().duration(200)
+                  .style("opacity", 0.92)
+                  .style("filter", "none");
+              }
+              tooltip.style("opacity", 0).style("display", "none");
+            });
 
-          // ── Click a word ──
-          texts.on("click", function(event, d) {
-            event.stopPropagation();
-            var isSame = activeWordFilter &&
-              activeWordFilter.genre === genre &&
-              activeWordFilter.word === d.text;
+          // ── Click a word ──
+          texts.on("click", function(event, d) {
+            event.stopPropagation();
+            var isSame = activeWordFilter &&
+              activeWordFilter.genre === genre &&
+              activeWordFilter.word === d.text;
 
-            // Clicking any word exits genre-isolation mode in the word cloud
-            isolatedGenre = null;
-            genreCards.forEach(function(c) {
-              c.classList.remove("wc-card--genre-isolated");
-              c.classList.remove("wc-card--genre-nonisolated");
-            });
+            // Clicking any word exits genre-isolation mode in the word cloud
+            isolatedGenre = null;
+            genreCards.forEach(function(c) {
+              c.classList.remove("wc-card--genre-isolated");
+              c.classList.remove("wc-card--genre-nonisolated");
+            });
 
-            if (isSame) {
-              activeWordFilter = null;
-              window.genreEvents.emit("wordcloud:wordClick", { genre: null, word: null });
-              texts.transition().duration(200).style("opacity", 0.92).style("filter", "none");
-              card.classList.remove("wc-card--selected");
-            } else {
-              activeWordFilter = { genre: genre, word: d.text };
-              // Emit using the t-SNE-side genre key
-              window.genreEvents.emit("wordcloud:wordClick", { genre: tsneGenreKey(genre), word: d.text });
-              texts.transition().duration(200)
-                .style("opacity", function(wd) { return wd.text === d.text ? 1 : 0.18; })
-                .style("filter",  function(wd) { return wd.text === d.text ? "drop-shadow(0 0 8px " + d.color + ")" : "none"; });
-              card.classList.add("wc-card--selected");
-            }
-          });
+            if (isSame) {
+              activeWordFilter = null;
+              window.genreEvents.emit("wordcloud:wordClick", { genre: null, word: null });
+              texts.transition().duration(200).style("opacity", 0.92).style("filter", "none");
+              card.classList.remove("wc-card--selected");
+            } else {
+              activeWordFilter = { genre: genre, word: d.text };
+              // Emit using the t-SNE-side genre key
+              window.genreEvents.emit("wordcloud:wordClick", { genre: tsneGenreKey(genre), word: d.text });
+              texts.transition().duration(200)
+                .style("opacity", function(wd) { return wd.text === d.text ? 1 : 0.18; })
+                .style("filter",  function(wd) { return wd.text === d.text ? "drop-shadow(0 0 8px " + d.color + ")" : "none"; });
+              card.classList.add("wc-card--selected");
+            }
+          });
 
-          // Another card's word was clicked — reset this card
-          window.genreEvents.on("wordcloud:wordClick", function(payload) {
-            if (payload.genre !== genre && payload.genre !== null) {
-              texts.transition().duration(200).style("opacity", 0.92).style("filter", "none");
-              card.classList.remove("wc-card--selected");
-            }
-          });
+          // Another card's word was clicked — reset this card
+          window.genreEvents.on("wordcloud:wordClick", function(payload) {
+            if (payload.genre !== genre && payload.genre !== null) {
+              texts.transition().duration(200).style("opacity", 0.92).style("filter", "none");
+              card.classList.remove("wc-card--selected");
+            }
+          });
 
-          // ── wordcloud:genreClick fired (from label click) ──
-          // Sync any stale word-highlight state on all cards when a genre is isolated
-          window.genreEvents.on("wordcloud:genreClick", function(payload) {
-            // Reset word-level highlights on every card regardless of which genre was clicked
-            texts.transition().duration(200).style("opacity", 0.92).style("filter", "none");
-            card.classList.remove("wc-card--selected");
-          });
+          // ── wordcloud:genreClick fired (from label click) ──
+          // Sync any stale word-highlight state on all cards when a genre is isolated
+          window.genreEvents.on("wordcloud:genreClick", function(payload) {
+            // Reset word-level highlights on every card regardless of which genre was clicked
+            texts.transition().duration(200).style("opacity", 0.92).style("filter", "none");
+            card.classList.remove("wc-card--selected");
+          });
 
-          // ── panel:wordHighlight → glow matching word ──
-          window.genreEvents.on("panel:wordHighlight", function(payload) {
-            var word       = payload.word;
-            var fromGenre  = payload.genre;
-            if (fromGenre !== genre) return;  // only affect the relevant cloud
-            texts.transition().duration(200)
-              .style("opacity", function(wd) { return wd.text === word ? 1 : 0.18; })
-              .style("filter",  function(wd) {
-                if (wd.text !== word) return "none";
-                return "drop-shadow(0 0 10px " + wd.color + ")";
-              });
-            card.classList.add("wc-card--selected");
-          });
+          // ── panel:wordHighlight → glow matching word ──
+          window.genreEvents.on("panel:wordHighlight", function(payload) {
+            var word       = payload.word;
+            var fromGenre  = payload.genre;
+            if (fromGenre !== genre) return;  // only affect the relevant cloud
+            texts.transition().duration(200)
+              .style("opacity", function(wd) { return wd.text === word ? 1 : 0.18; })
+              .style("filter",  function(wd) {
+                if (wd.text !== word) return "none";
+                return "drop-shadow(0 0 10px " + wd.color + ")";
+              });
+            card.classList.add("wc-card--selected");
+          });
 
-          window.genreEvents.on("panel:wordClear", function() {
-            texts.transition().duration(200).style("opacity", 0.92).style("filter", "none");
-            card.classList.remove("wc-card--selected");
-            activeWordFilter = null;
-          });
-        }
-      });
-    });
+          window.genreEvents.on("panel:wordClear", function() {
+            texts.transition().duration(200).style("opacity", 0.92).style("filter", "none");
+            card.classList.remove("wc-card--selected");
+            activeWordFilter = null;
+          });
+        } // Closes draw(placedWords)
+      }); // Closes requestAnimationFrame
+    }); // <--- ADDED: Closes genres.forEach(function(genre) { ...
 
-  }).catch(function(err) {
-    console.error("Word cloud: failed to load CSV", err);
-    container.innerHTML = '<p class="wc-error">Could not load data. Run via a local web server (e.g. <code>npx serve</code>).</p>';
-  });
+  } // Closes initWordclouds()
+
+  // Initialize when data is available
+  initWordclouds();
 
 })();

@@ -82,13 +82,9 @@ function getBaseOpacity(d) {
   return 0.7;
 }
 
-// ── Load both CSVs in parallel ────────────────────────────────────────────────
-Promise.all([
-  d3.csv("./data/tsne_data.csv"),
-  d3.csv("./data/song_lyrics_short.csv").catch(() => [])
-]).then(function(results) {
-  var tsneData   = results[0];
-  var lyricsRows = results[1];
+// ── Load merged dataset (audio features + lyrics) ───────────────────────────
+d3.csv("./data/merged_spotify_with_lyrics.csv").then(function(mergedData) {
+  var tsneData = mergedData;
 
   // ── Pre-process lyrics ────────────────────────────────────────────────────
   var STOP = new Set([
@@ -116,15 +112,17 @@ Promise.all([
   var lyricsBySong    = new Map();
   var genreWordIndex  = new Map();  // genre → Map(word → Set(normKey))
 
-  for (var i = 0; i < lyricsRows.length; i++) {
-    var row    = lyricsRows[i];
-    var title  = (row.title  || row.song  || "").trim();
+  for (var i = 0; i < tsneData.length; i++) {
+    var row    = tsneData[i];
+    var title  = (row.title || "").trim();
     var artist = (row.artist || "").trim();
-    var tag    = (row.tag    || "").trim().toLowerCase();
+    var genre  = (row.genre || "").trim().toLowerCase();
+    var lyrics = (row.lyrics || "").trim();
+    
     if (!title) continue;
 
     var key    = normKey(title, artist);
-    var tokens = tokenizeSimple(row.lyrics || "");
+    var tokens = tokenizeSimple(lyrics);
     var freq   = {};
     for (var j = 0; j < tokens.length; j++) {
       var w = tokens[j];
@@ -139,9 +137,9 @@ Promise.all([
     lyricsBySong.set(key, topWords);
 
     // genre word index
-    if (tag) {
-      if (!genreWordIndex.has(tag)) genreWordIndex.set(tag, new Map());
-      var wordMap     = genreWordIndex.get(tag);
+    if (genre) {
+      if (!genreWordIndex.has(genre)) genreWordIndex.set(genre, new Map());
+      var wordMap     = genreWordIndex.get(genre);
       var uniqueWords = new Set(tokens);
       uniqueWords.forEach(function(ww) {
         if (!wordMap.has(ww)) wordMap.set(ww, new Set());
