@@ -68,14 +68,22 @@
   const chartDiv = document.createElement("div");
   chartDiv.id = "violin-chart";
   chartDiv.className = "vp-chart";
+  // Bottom padding only — horizontal label space is handled by the dynamic
+  // margin.left inside the SVG, so no side padding is needed here.
+  wrapper.style.padding = "0 0 16px 0";
   wrapper.appendChild(chartDiv);
 
   let cachedRows = null;
 
   // ── Load ──────────────────────────────────────────────────────────────────
-  d3.csv("./data/tsne_data.csv").then(function (rows) {
-    cachedRows = rows;
-    renderViolins(rows, FEATURES[0].key);
+  // Wait for both the CSV data AND the shared colour map (built by script.js)
+  // before rendering, so gColor() never falls back to the hardcoded palette.
+  Promise.all([
+    d3.csv("./data/tsne_data.csv"),
+    window.genreColorMapReady || Promise.resolve(),
+  ]).then(function (results) {
+    cachedRows = results[0];
+    renderViolins(cachedRows, FEATURES[0].key);
   }).catch(function (err) {
     console.error("violin: failed to load CSV", err);
     chartDiv.innerHTML = '<p class="wc-error">Could not load tsne_data.csv</p>';
@@ -99,25 +107,31 @@
     if (!genres.length) return;
 
     // Dimensions
-    const margin = { top: 18, right: 20, bottom: 36, left: 52 };
-    const totalW = chartDiv.clientWidth  || 680;
-    const ROW_H  = 54;
+    // margin.left is computed from the longest genre label so nothing is clipped.
+    // Approximate text width at font-size 10px, weight 600 ≈ 7px per character.
+    const longestLabel = genres.reduce((a, b) => b.length > a.length ? b : a, "");
+    const leftPad = longestLabel.length * 6 + 10; // 16px gap between label and axis
+
+    const margin = { top: 42, right: 20, bottom: 40, left: leftPad };
+    const totalW = Math.max(300, (chartDiv.clientWidth || 680));
+    const ROW_H  = 60;
     const totalH = genres.length * ROW_H + margin.top + margin.bottom;
     const W = totalW - margin.left - margin.right;
     const H = totalH - margin.top  - margin.bottom;
 
     const svg = d3.select(chartDiv).append("svg")
-      .attr("width",  totalW)
+      .attr("width",  "100%")
       .attr("height", totalH)
       .attr("viewBox", `0 0 ${totalW} ${totalH}`)
-      .attr("preserveAspectRatio", "xMidYMid meet");
+      .attr("preserveAspectRatio", "xMidYMid meet")
+      .style("overflow", "visible");
 
     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
     // X scale: 0-1
     const xScale = d3.scaleLinear().domain([0, 1]).range([0, W]);
 
-    // Grid lines
+    // Grid lines + axis tick labels (top and bottom)
     [0, 0.25, 0.5, 0.75, 1].forEach(function (v) {
       g.append("line")
         .attr("x1", xScale(v)).attr("x2", xScale(v))
@@ -125,8 +139,17 @@
         .attr("stroke", "rgba(255,255,255,0.05)")
         .attr("stroke-width", 1)
         .attr("stroke-dasharray", v === 0 || v === 1 ? "none" : "3,3");
+      // Bottom label
       g.append("text")
         .attr("x", xScale(v)).attr("y", H + 18)
+        .attr("text-anchor", "middle")
+        .attr("font-size", 9)
+        .attr("font-family", "'DM Sans', sans-serif")
+        .attr("fill", "rgba(255,255,255,0.3)")
+        .text(v.toFixed(2));
+      // Top label
+      g.append("text")
+        .attr("x", xScale(v)).attr("y", -10)
         .attr("text-anchor", "middle")
         .attr("font-size", 9)
         .attr("font-family", "'DM Sans', sans-serif")

@@ -52,7 +52,13 @@
   const bus = window.genreEvents;
 
   // ── Load data ─────────────────────────────────────────────────────────────
-  d3.csv("./data/tsne_data.csv").then(function (rows) {
+  // Wait for both the CSV data AND the shared colour map (built by script.js)
+  // before rendering, so gColor() never falls back to the hardcoded palette.
+  Promise.all([
+    d3.csv("./data/tsne_data.csv"),
+    window.genreColorMapReady || Promise.resolve(),
+  ]).then(function (results) {
+    const rows = results[0];
 
     // Compute per-genre averages
     const byGenre = {};

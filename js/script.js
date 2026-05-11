@@ -23,6 +23,16 @@ if (!window.genreEvents) {
   };
 }
 
+// ── Colour-map readiness promise ──────────────────────────────────────────────
+// Resolved the moment window.genreColorMap is fully populated inside the CSV
+// .then() below.  radarGrid.js and violinPlot.js await this before painting so
+// they never race against the t-SNE fetch.
+if (!window._genreColorMapResolve) {
+  window.genreColorMapReady = new Promise(function (resolve) {
+    window._genreColorMapResolve = resolve;
+  });
+}
+
 const margin = { top: 12, right: 12, bottom: 12, left: 12 };
 const chartHost = document.querySelector("#tsne-chart");
 const hostWidth = chartHost?.clientWidth || 760;
@@ -182,8 +192,10 @@ Promise.all([
     var key = (g || "").toLowerCase().trim();
     genreColorMap.set(g, GENRE_COLORS[key] || FALLBACK_COLORS[_fallbackIdx++ % FALLBACK_COLORS.length]);
   });
-  // Expose globally so other modules share the exact same colours
+  // Expose globally so other modules share the exact same colours, then
+  // signal that the map is ready so radarGrid / violinPlot don't race.
   window.genreColorMap = genreColorMap;
+  if (window._genreColorMapResolve) { window._genreColorMapResolve(genreColorMap); }
 
   var genreSorted   = genres.slice().sort(function(a, b) { return a.localeCompare(b); });
   var totalGenres   = genreSorted.length;
