@@ -229,7 +229,7 @@ Promise.all([
   }
 
   // ── Legend ─────────────────────────────────────────────────────────────────
-  var toggleAllBtn = d3.select("#tsne-legend")
+  var toggleAllBtn = d3.select(".tsne-toolbar")
     .append("button")
     .attr("type", "button")
     .attr("id", "legend-toggle-all")

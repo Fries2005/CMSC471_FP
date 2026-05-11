@@ -75,7 +75,20 @@
 
         <section class="viz-grid">
 
-            <!-- ① t-SNE with Brush Toggle ─────────────────────────────────── -->
+            <!-- ① Brush Selection Word Cloud ─────────────────────────────── -->
+            <article class="viz-card viz-card-new">
+                <div class="viz-card-header">
+                    <h3>Cluster Lyrical DNA</h3>
+                    <p>
+                        Activate <strong>Brush Select</strong> in the t-SNE chart to the right, then drag a rectangle over any region of the t-SNE.
+                        The words that define that spatial cluster — regardless of genre — will appear here.
+                        Cross-genre clusters reveal lyrical themes that unite acoustically similar songs.
+                    </p>
+                </div>
+                <div id="brush-wc-container"></div>
+            </article>
+
+            <!-- ② t-SNE with Brush Toggle ─────────────────────────────────── -->
             <article class="viz-card viz-card-featured">
                 <div class="viz-card-header">
                     <h3>t-SNE Genre Clustering</h3>
@@ -90,22 +103,9 @@
                     </div>
                 </div>
                 <div id="viz-container" class="viz-shell">
-                    <div id="tsne-chart" class="tsne-chart-panel" aria-label="t-SNE scatter plot"></div>
                     <div id="tsne-legend" class="tsne-legend-panel" role="group" aria-label="Genres — click to hide or show"></div>
+                    <div id="tsne-chart" class="tsne-chart-panel" aria-label="t-SNE scatter plot"></div>
                 </div>
-            </article>
-
-            <!-- ② Brush Selection Word Cloud ─────────────────────────────── -->
-            <article class="viz-card viz-card-new">
-                <div class="viz-card-header">
-                    <h3>Cluster Lyrical DNA</h3>
-                    <p>
-                        Activate <strong>Brush Select</strong> above, then drag a rectangle over any region of the t-SNE.
-                        The words that define that spatial cluster — regardless of genre — will appear here.
-                        Cross-genre clusters reveal lyrical themes that unite acoustically similar songs.
-                    </p>
-                </div>
-                <div id="brush-wc-container"></div>
             </article>
 
             <!-- ③ Lyrical DNA word clouds ─────────────────────────────────── -->
