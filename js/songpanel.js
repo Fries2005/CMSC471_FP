@@ -424,7 +424,7 @@
   // ── Helpers ────────────────────────────────────────────────────────────────
   function findNeighbours(song, allSongs, k) {
     return allSongs
-      .filter(s => s !== song)
+      .filter(s => normKey(s.title, s.artist) !== normKey(song.title, song.artist))
       .map(s => ({ ...s, dist: Math.hypot(+s.x - +song.x, +s.y - +song.y) }))
       .sort((a, b) => a.dist - b.dist)
       .slice(0, k);
