@@ -16,7 +16,7 @@
   const FEATURES = [
     { key: "danceability",     label: "Dance",        normKey: "danceability",     color: "#fd79a8" },
     { key: "energy",           label: "Energy",       normKey: "energy",           color: "#fdcb6e" },
-    { key: "loudness_norm",    label: "Loudness",     normKey: "loudness_norm",    color: "#e17055" },
+    { key: "loudness_norm",    label: "Loud",     normKey: "loudness_norm",    color: "#e17055" },
     { key: "speechiness",      label: "Speech",       normKey: "speechiness",      color: "#74b9ff" },
     { key: "acousticness",     label: "Acoustic",     normKey: "acousticness",     color: "#55efc4" },
     { key: "instrumentalness", label: "Instrumental", normKey: "instrumentalness", color: "#a29bfe" },
@@ -387,7 +387,7 @@
   function drawRadar(feat) {
     const svgEl = document.getElementById("sp-radar");
     svgEl.innerHTML = "";
-    const size = 160, cx = size / 2, cy = size / 2, R = size * 0.38, n = FEATURES.length;
+    const size = 180, cx = size / 2, cy = size / 2, R = size * 0.36, n = FEATURES.length;
     const svg = d3.select(svgEl).attr("viewBox", `0 0 ${size} ${size}`).attr("width", size).attr("height", size);
     [0.25, 0.5, 0.75, 1].forEach(t => {
       const pts = FEATURES.map((_, i) => { const a = (i/n)*2*Math.PI - Math.PI/2; return [cx+R*t*Math.cos(a), cy+R*t*Math.sin(a)]; });

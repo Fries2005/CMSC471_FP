@@ -196,7 +196,7 @@
         .attr("y", cy + (R + 10) * Math.sin(a))
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
-        .attr("font-size", 6.5)
+        .attr("font-size", 5)
         .attr("font-family", "'DM Sans', sans-serif")
         .attr("fill", "rgba(255,255,255,0.38)")
         .text(f.label);
