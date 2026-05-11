@@ -415,6 +415,10 @@ Promise.all([
     });
 
   svg.call(zoom);
+  window.tsneSvg = svg;
+  window.tsneZoom = zoom;
+  window.tsneData = tsneData;
+  window.lyricsBySong = lyricsBySong;
 
 }).catch(function(err) {
   console.error("Failed to load data:", err);

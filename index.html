@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/additions.css">
     <style>
         /* ── Interactive patch (word-cloud ↔ t-SNE ↔ song panel) ─────────── */
 
@@ -73,10 +74,20 @@
         </section>
 
         <section class="viz-grid">
+
+            <!-- ① t-SNE with Brush Toggle ─────────────────────────────────── -->
             <article class="viz-card viz-card-featured">
                 <div class="viz-card-header">
                     <h3>t-SNE Genre Clustering</h3>
                     <p>Songs projected into 2D space by feature similarity. Click any dot to explore that song. Use zoom, pan, and click legend genres to filter.</p>
+
+                    <!-- Brush toolbar -->
+                    <div class="tsne-toolbar">
+                        <button id="brush-toggle-btn" type="button">
+                            ⬚ Brush Select
+                        </button>
+                        <span class="tsne-brush-hint">Draw a box to reveal the lyrical DNA of any cluster</span>
+                    </div>
                 </div>
                 <div id="viz-container" class="viz-shell">
                     <div id="tsne-chart" class="tsne-chart-panel" aria-label="t-SNE scatter plot"></div>
@@ -84,6 +95,20 @@
                 </div>
             </article>
 
+            <!-- ② Brush Selection Word Cloud ─────────────────────────────── -->
+            <article class="viz-card viz-card-new">
+                <div class="viz-card-header">
+                    <h3>Cluster Lyrical DNA</h3>
+                    <p>
+                        Activate <strong>Brush Select</strong> above, then drag a rectangle over any region of the t-SNE.
+                        The words that define that spatial cluster — regardless of genre — will appear here.
+                        Cross-genre clusters reveal lyrical themes that unite acoustically similar songs.
+                    </p>
+                </div>
+                <div id="brush-wc-container"></div>
+            </article>
+
+            <!-- ③ Lyrical DNA word clouds ─────────────────────────────────── -->
             <article class="viz-card viz-card-wordcloud">
                 <div class="viz-card-header">
                     <h3>Lyrical DNA by Genre</h3>
@@ -92,21 +117,57 @@
                 <div id="wc-grid" class="wc-grid"></div>
             </article>
 
-            <article class="viz-card viz-card-placeholder">
-                <div class="viz-card-header">
-                    <h3>Placeholder 2</h3>
-                    <p>Some description here.</p>
-                </div>
-            </article>
+            <!-- ④ + ⑤  Radar Grid  &  Violin Plots — side-by-side, each half-width -->
+            <div class="viz-row-halves">
+
+                <article class="viz-card viz-card-new viz-card-half">
+                    <div class="viz-card-header">
+                        <h3>Audio Feature Fingerprints by Genre</h3>
+                        <p>
+                            Average radar shape for each genre — compare how EDM peaks on energy &amp; danceability,
+                            country on acousticness &amp; valence, and rap on speechiness at a glance.
+                            Click any card to isolate that genre across all views.
+                            Hover for exact percentages.
+                        </p>
+                    </div>
+                    <div id="radar-grid-container"></div>
+                </article>
+
+                <article class="viz-card viz-card-new viz-card-half">
+                    <div class="viz-card-header">
+                        <h3>Feature Distributions by Genre</h3>
+                        <p>
+                            Select any audio feature to see how it distributes across genres.
+                            The violin shape shows the full density of values;
+                            the box marks the interquartile range; the white line is the median; the dot is the mean.
+                            Wide violins = blurry genres. Narrow, peaked shapes = pure genres for that feature.
+                        </p>
+                    </div>
+                    <div id="violin-container"></div>
+                </article>
+
+            </div>
+
         </section>
     </main>
 
     <div id="tooltip" class="tooltip"></div>
 
-    <!-- Load order: event bus lives in script.js, panel listens to it -->
+    <!--
+      Load order matters:
+        1. script.js   — event bus + t-SNE chart
+        2. wordcloud.js — lyric word clouds
+        3. songpanel.js — song detail panel
+        4. radarGrid.js — genre radar small-multiples  (new)
+        5. violinPlot.js — feature distribution plots   (new)
+        6. brushSelect.js — brush on t-SNE              (new; must load AFTER script.js paints circles)
+    -->
     <script src="js/script.js"></script>
     <script src="js/wordcloud.js"></script>
     <script src="js/songpanel.js"></script>
+    <script src="js/radarGrid.js"></script>
+    <script src="js/violinPlot.js"></script>
+    <script src="js/brushSelect.js"></script>
 
 </body>
 </html>
