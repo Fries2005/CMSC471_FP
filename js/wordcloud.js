@@ -336,10 +336,13 @@
           // ── Tooltip ──
           texts
             .on("mouseover", function(event, d) {
-              d3.select(this).transition().duration(120)
-                .style("opacity", 1)
-                .style("filter", "drop-shadow(0 0 6px " + d.color + ")");
-              tooltip.style("opacity", 1).style("display", "block")
+              // Only apply hover highlight if no word is currently clicked as active filter
+              if (!activeWordFilter) {
+                d3.select(this).transition().duration(120)
+                  .style("opacity", 1)
+                  .style("filter", "drop-shadow(0 0 6px " + d.color + ")");
+              }
+              tooltip.style("opacity", 1).style("display", "block")
                 .html(
                   "<strong>" + d.text + "</strong><br/>" +
                   "<span style='color:#aaa;font-size:11px'>in " + genreDisplayLabel(genre) + "</span><br/>" +
@@ -354,17 +357,18 @@
                      .style("top",  (event.pageY - 20) + "px");
             })
             .on("mouseout", function(event, d) {
-              // Only reset if this word isn't the active filter
-              var isActive = activeWordFilter &&
-                activeWordFilter.genre === genre &&
-                activeWordFilter.word === d.text;
-              if (!isActive) {
-                d3.select(this).transition().duration(200)
-                  .style("opacity", 0.92)
-                  .style("filter", "none");
-              }
-              tooltip.style("opacity", 0).style("display", "none");
-            });
+              var isActiveWord = activeWordFilter &&
+                activeWordFilter.genre === genre &&
+                activeWordFilter.word === d.text;
+              if (!isActiveWord) {
+                // If a filter is active, non-selected words stay dimmed; otherwise restore normally
+                var restoreOpacity = activeWordFilter ? 0.18 : 0.92;
+                d3.select(this).transition().duration(200)
+                  .style("opacity", restoreOpacity)
+                  .style("filter", "none");
+              }
+              tooltip.style("opacity", 0).style("display", "none");
+            });
 
           // ── Click a word ──
           texts.on("click", function(event, d) {
