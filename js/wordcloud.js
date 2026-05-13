@@ -336,8 +336,10 @@
           // ── Tooltip ──
           texts
             .on("mouseover", function(event, d) {
-              // Only apply hover highlight if no word is currently clicked as active filter
-              if (!activeWordFilter) {
+              // Only suppress hover highlight within the card that has an active word filter;
+              // other clouds should still glow on hover normally.
+              var filterIsInThisCloud = activeWordFilter && activeWordFilter.genre === genre;
+              if (!filterIsInThisCloud) {
                 d3.select(this).transition().duration(120)
                   .style("opacity", 1)
                   .style("filter", "drop-shadow(0 0 6px " + d.color + ")");
@@ -361,8 +363,10 @@
                 activeWordFilter.genre === genre &&
                 activeWordFilter.word === d.text;
               if (!isActiveWord) {
-                // If a filter is active, non-selected words stay dimmed; otherwise restore normally
-                var restoreOpacity = activeWordFilter ? 0.18 : 0.92;
+                // Only dim to 0.18 if a filter is active within THIS card's genre;
+                // words in other clouds should always restore to full opacity.
+                var filterIsInThisCloud = activeWordFilter && activeWordFilter.genre === genre;
+                var restoreOpacity = filterIsInThisCloud ? 0.18 : 0.92;
                 d3.select(this).transition().duration(200)
                   .style("opacity", restoreOpacity)
                   .style("filter", "none");
