@@ -92,8 +92,10 @@
             <article class="viz-card viz-card-featured">
                 <div class="viz-card-header">
                     <h3>t-SNE Genre Clustering</h3>
-                    <p>Here, each song, represented by a dots, is projected onto a 2D space based on how musically similar they are to one another. Songs that are more alike appear closer together, while songs that are different appear further apart.
-                        See each basic information about a song by hovering over a dot, and click on a dot to learn more about a song and hear a preview! You can move around the map by clicking, dragging, and pinching to zoom in or out. 
+                    <p>Here, each song, represented by a dots, is projected onto a 2D space based on how musically similar they are to one another. We use t-SNE to project 9 separate Spotify metrics, shown by clicking any dot, on the 2D plane.
+                        Songs that are more alike appear closer together, while songs that are different appear further apart.
+                        See basic information about a song by hovering over a dot, and click on a dot to learn more about a song and hear a preview! 
+                        We show information such as the 9 different Spotify metrics in a radar chart, key stats, common lyrics of the song, and similar songs via Nearest Neighbors. You can also move around the map by clicking, dragging, and pinching to zoom in or out. 
                         You can also use the legend to toggle different genres on or off, either isolating specific styles or comparing cross-genre in the feature space.</p>
                     <!-- Brush toolbar -->
                     <div class="tsne-toolbar">
@@ -113,7 +115,7 @@
             <article class="viz-card viz-card-wordcloud">
                 <div class="viz-card-header">
                     <h3>Lyrical DNA by Genre</h3>
-                    <p>This visualization uses word clouds to organize common lyrics by genre. Each genre has its own word cloud with words extracted from its song lyrics.
+                    <p>This visualization uses word clouds to organize common lyrics by genre. Each genre, identical to the t-SNE visualization, has its own word cloud with words extracted from its song lyrics.
                         The size of words are related to their frequency of songs in that genre, with higher frequency words being larger in the word cloud. Use this part of the visualization to learn more about the language that goes into defining a genre.</p>
                     <p>Clicking on a word in the world cloud highlights all the songs in the t-SNE cluster from that genre that contain the word. 
                         You are also able to click on the genre title in the top left of the word cloud to also isolate that genre in the t-SNE cluster, similar to selecting the genre title in the legend. This interaction with the t-SNE cluster can help compare across genre and learn where genres align and disagree on lyricism.
@@ -129,7 +131,7 @@
                     <div class="viz-card-header">
                         <h3>Audio Feature Fingerprints by Genre</h3>
                         <p>
-                            Average radar shape for each genre — compare how EDM peaks on energy &amp; danceability,
+                            Average radar shape for each genre using the same 9 Spotify metrics from the t-SNE visualization. Compare how EDM peaks on energy &amp; danceability,
                             country on acousticness &amp; valence, and rap on speechiness at a glance.
                             Click any card to isolate that genre across all views.
                             Hover for exact percentages.
@@ -142,10 +144,10 @@
                     <div class="viz-card-header">
                         <h3>Feature Distributions by Genre</h3>
                         <p>
-                            Select any audio feature to see how it distributes across genres.
-                            The violin shape shows the full density of values;
-                            the box marks the interquartile range; the white line is the median; the dot is the mean.
-                            Wide violins = blurry genres. Narrow, peaked shapes = pure genres for that feature.
+                            Select any audio feature from the 9 Spotify metrics to see how it distributes across genres.
+                            The violin shape shows the full density of values.
+                            the box marks the interquartile range, the white line is the median, and the dot is the mean.
+                            Wide violins means blurry genres. Narrow, peaked shapes means pure genres for that feature.
                         </p>
                     </div>
                     <div id="violin-container"></div>
