@@ -423,19 +423,33 @@
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function findNeighbours(song, allSongs, k) {
+    const seen = new Set();
+    const currentKey = normKey(song.title, song.artist);
     return allSongs
-      .filter(s => normKey(s.title, s.artist) !== normKey(song.title, song.artist))
+      .filter(s => {
+        const key = normKey(s.title, s.artist);
+        if (key === currentKey || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
       .map(s => ({ ...s, dist: Math.hypot(+s.x - +song.x, +s.y - +song.y) }))
       .sort((a, b) => a.dist - b.dist)
       .slice(0, k);
   }
 
   const GENRE_COLORS = {
-    "r&b": "#26de81", rap: "#f7b731", rock: "#4b7bec",
-    pop: "#fd79a8", misc: "#a29bfe", country: "#e17055",
-    edm: "#81ecec", latin: "#fdcb6e",
-  };
-  function genreColor(g)          { return GENRE_COLORS[(g||"").toLowerCase()] || "#74b9ff"; }
+  "r&b": "#26de81", "hip-hop": "#f7b731", rap: "#f7b731", rock: "#4b7bec",
+  pop: "#fd79a8", misc: "#a29bfe", country: "#e17055",
+  edm: "#81ecec", latin: "#fdcb6e",
+};
+
+function genreColor(g) {
+  if (window.genreColorMap) {
+    const fromMap = window.genreColorMap.get(g);
+    if (fromMap) return fromMap;
+  }
+  return GENRE_COLORS[(g || "").toLowerCase()] || "#74b9ff";
+}
   function normKey(title, artist) { return `${title}|||${artist}`.toLowerCase(); }
 
   // ── CSS ────────────────────────────────────────────────────────────────────
