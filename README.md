@@ -57,7 +57,7 @@ After ideating and developing the concept for each of our visualizations, our te
 ### Jack
 - Ideated and prepared the problem statement and presentation hook
 - Prepared a full visualization demo for final demo day
-- Developed the GitHub README
+- Developed the Write-up and GitHub README
 
 ---
 
@@ -82,6 +82,15 @@ After ideating and developing the concept for each of our visualizations, our te
 | lyrics-generator-genius.py | Calls the Genius API to populate spotify_songs_with_lyrics.csv from the Spotify track list. | 
 | update-merged-lyrics.py | Refreshes lyrics from the Genius output file back onto the merged CSV. | 
 | index.html | Loads all visualization scripts for page layout. |
+
+--- 
+
+## <u><b>Code Sources</b></u>
+
+The visualization is sourced from two main Kaggle datasets as well as the Genius API. They are linked here to attribute credit to the original datasets. 
+- Genius Song Lyrics: https://www.kaggle.com/datasets/carlosgdcj/genius-song-lyrics-with-language-information
+- Spotify Music Dataset: https://www.kaggle.com/datasets/solomonameh/spotify-music-dataset
+- Genius API Documentation: https://docs.genius.com/#/getting-started-h1
 
 
 
