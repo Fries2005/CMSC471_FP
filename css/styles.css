@@ -66,6 +66,18 @@ body {
     color: #cfcfcf;
 }
 
+.story-text a {
+    color: #7bc9e8;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(123, 201, 232, 0.35);
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.story-text a:hover {
+    color: #d4f3ff;
+    border-color: rgba(123, 201, 232, 0.8);
+}
+
 .viz-grid {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -561,6 +573,7 @@ button.legend-genre-item:not(.legend-genre--isolated) {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  margin-top: 15px;
   margin-bottom: 10px;
 }
 

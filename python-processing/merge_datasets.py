@@ -1,3 +1,4 @@
+# Script to merge Spotify audio features with lyrics data and preprocess for t-SNE
 import os
 import pandas as pd
 from sklearn.preprocessing import StandardScaler

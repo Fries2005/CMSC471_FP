@@ -1,3 +1,4 @@
+# Script to fetch lyrics from Genius API for songs in the dataset
 import pandas as pd
 import lyricsgenius
 import time

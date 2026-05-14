@@ -1,3 +1,4 @@
+# Script to update the merged dataset with additional lyrics data
 import os
 import pandas as pd
 

@@ -1,3 +1,4 @@
+# Script to perform t-SNE dimensionality reduction on Spotify audio features
 import os
 import pandas as pd
 from sklearn.manifold import TSNE
