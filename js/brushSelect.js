@@ -166,6 +166,8 @@
       const selected = [];
       svgD3.selectAll("circle").each(function (d) {
         if (!d) return;
+        if (d3.select(this).attr("display") === "none") return;  // skip hidden genres
+        if (+d3.select(this).style("opacity") < 0.1) return;     // skip dimmed (word/isolation filter)
         const cx = +this.getAttribute("cx");
         const cy = +this.getAttribute("cy");
         if (cx >= dx0 && cx <= dx1 && cy >= dy0 && cy <= dy1) selected.push(d);
